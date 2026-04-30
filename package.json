@@ -6,7 +6,8 @@
   "description": "法定相続分シミュレーター",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "vite build",
+    "typecheck": "tsc -b",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
