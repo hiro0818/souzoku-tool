@@ -241,6 +241,44 @@ const SAMPLES = [
         }
       ]
     })
+  },
+  {
+    id: 'sequential-x-representation',
+    title: '数次×代襲のクロス（実例風）',
+    desc: '兄Bが後で死亡、Bの子Aは先死亡で甥A1/A2が代襲、別の子AAは生存',
+    apply: () => ({
+      ...initialState,
+      spouse: { present: false, alive: true, renounced: false, name: '配偶者' },
+      hasChildren: false,
+      parentsStatus: 'allDead',
+      grandparentsStatus: 'allDead',
+      hasSiblings: true,
+      siblingsCount: 1,
+      siblings: [
+        {
+          id: 's1', name: '兄B', alive: false, renounced: false, halfBlood: false,
+          diedAfter: true,
+          hasNiblings: false, niblingsCount: 0, descendants: [],
+          successors: {
+            spouse: { present: true, alive: true, name: 'Bの配偶者' },
+            children: [
+              {
+                id: 'succ-s1-1', name: 'Bの子A（先死亡）',
+                alive: false, renounced: false,
+                descendants: [
+                  { id: 'a1', name: '甥A1', alive: true, renounced: false, descendants: [] },
+                  { id: 'a2', name: '甥A2', alive: true, renounced: false, descendants: [] }
+                ]
+              },
+              {
+                id: 'succ-s1-2', name: 'Bの子AA（生存）',
+                alive: true, renounced: false, descendants: []
+              }
+            ]
+          }
+        }
+      ]
+    })
   }
 ];
 
@@ -875,8 +913,118 @@ function HelpHint({ text }) {
   );
 }
 
-// 数次相続：「後死」者の相続人（配偶者＋子）入力
-function SuccessorsInput({ value, onChange, ownerName }) {
+// 一人分の入力UI（再帰可能：descendants または successors を持てる）
+// depth: ネストの深さ（5階層まで）
+function PersonInput({ value, onChange, onRemove, label, depth = 0 }) {
+  const v = value || { id: `p-${Date.now()}`, name: '', alive: true, renounced: false };
+
+  // 状態：alive / before(先死亡) / simul(同時死亡) / after(後死亡=数次) / renounced
+  const status =
+    v.renounced ? 'renounced' :
+    v.diedAfter ? 'after' :
+    v.simultaneousDeath ? 'simul' :
+    !v.alive ? 'before' : 'alive';
+
+  const setStatus = (s) => {
+    const next = {
+      ...v,
+      alive: true,
+      renounced: false,
+      diedAfter: false,
+      simultaneousDeath: false
+    };
+    if (s === 'before') next.alive = false;
+    else if (s === 'simul') { next.alive = false; next.simultaneousDeath = true; }
+    else if (s === 'after') { next.alive = false; next.diedAfter = true; }
+    else if (s === 'renounced') next.renounced = true;
+    if (s !== 'before' && s !== 'simul') next.descendants = next.descendants || [];
+    onChange(next);
+  };
+
+  const setDescendants = (arr) => onChange({ ...v, descendants: arr });
+  const setSuccessors = (succ) => onChange({ ...v, successors: succ });
+
+  const setDescCount = (n) => {
+    const cur = v.descendants || [];
+    const arr = [];
+    for (let i = 1; i <= n; i++) {
+      arr.push(cur[i-1] || { id: `d-${Date.now()}-${i}`, name: `${v.name || '本人'}の子${i}`, alive: true, renounced: false, descendants: [] });
+    }
+    setDescendants(arr);
+  };
+
+  const padding = depth === 0 ? '' : 'ml-3';
+  const bg = depth === 0 ? 'bg-yellow-50 border-yellow-300' :
+             depth === 1 ? 'bg-amber-50 border-amber-300' :
+             depth === 2 ? 'bg-orange-50 border-orange-300' :
+                           'bg-rose-50 border-rose-300';
+
+  return (
+    <div className={`${padding} ${bg} border rounded p-2 space-y-2 text-sm`}>
+      <div className="flex items-center gap-2">
+        {label && <span className="badge bg-stone-700 text-white text-xs">{label}</span>}
+        <input type="text" value={v.name || ''} placeholder="氏名"
+          onChange={e => onChange({ ...v, name: e.target.value })}
+          className="border rounded px-2 py-1 text-sm flex-1 min-w-0" />
+        {onRemove && (
+          <button type="button" onClick={onRemove}
+            className="text-xs text-rose-600 hover:underline">削除</button>
+        )}
+      </div>
+      <div className="flex flex-wrap gap-1">
+        <span className="text-xs text-stone-600 self-center mr-1">状態：</span>
+        {[
+          { v: 'alive', label: 'ご存命' },
+          { v: 'before', label: '先死亡(代襲)' },
+          { v: 'simul', label: '同時死亡' },
+          { v: 'after', label: '後死亡(数次)' },
+          { v: 'renounced', label: '相続放棄' }
+        ].map(o => (
+          <button key={o.v} type="button" onClick={() => setStatus(o.v)}
+            className={`px-2 py-0.5 text-xs border rounded ${status === o.v ? 'bg-stone-900 text-white border-stone-900' : 'bg-white text-stone-700 border-stone-300 hover:bg-stone-50'}`}>
+            {o.label}
+          </button>
+        ))}
+      </div>
+
+      {/* 代襲（先死亡 or 同時死亡） */}
+      {(status === 'before' || status === 'simul') && depth < 5 && (
+        <div className="pl-2 border-l-2 border-stone-300 space-y-1.5">
+          <p className="text-xs text-stone-600">この方のお子さん（代襲）：</p>
+          <NumberPick label="子の人数" value={(v.descendants || []).length} min={0} max={10}
+            onChange={setDescCount} />
+          {(v.descendants || []).map((d, di) => (
+            <PersonInput key={d.id || di} value={d} depth={depth + 1}
+              label={`${di+1}`}
+              onChange={(nd) => {
+                const arr = [...(v.descendants || [])];
+                arr[di] = nd;
+                setDescendants(arr);
+              }} />
+          ))}
+        </div>
+      )}
+
+      {/* 数次相続（後死亡） */}
+      {status === 'after' && depth < 5 && (
+        <div className="pl-2 border-l-2 border-stone-300 space-y-1.5">
+          <p className="text-xs text-stone-600">この方が後で亡くなったため、その相続人へ承継：</p>
+          <SuccessorsInput value={v.successors}
+            ownerName={v.name || 'この方'}
+            depth={depth + 1}
+            onChange={setSuccessors} />
+        </div>
+      )}
+
+      {depth >= 5 && (status === 'before' || status === 'simul' || status === 'after') && (
+        <p className="text-xs text-amber-700">⚠ ネスト上限に達しました（5階層）</p>
+      )}
+    </div>
+  );
+}
+
+// 数次相続：「後死」者の相続人（配偶者＋子）入力（PersonInput を再帰利用）
+function SuccessorsInput({ value, onChange, ownerName, depth = 1 }) {
   const v = value || { spouse: { present: false, alive: true, name: '' }, children: [] };
   const spouse = v.spouse || { present: false, alive: true, name: '' };
   const children = v.children || [];
@@ -887,41 +1035,47 @@ function SuccessorsInput({ value, onChange, ownerName }) {
   const setChildCount = (n) => {
     const arr = [];
     for (let i = 1; i <= n; i++) {
-      arr.push(children[i-1] || { id: `succ-${Date.now()}-${i}`, name: `${ownerName || 'この方'}のお子さん${i}`, alive: true, renounced: false });
+      arr.push(children[i-1] || {
+        id: `succ-${Date.now()}-${i}`,
+        name: `${ownerName || 'この方'}のお子さん${i}`,
+        alive: true, renounced: false, descendants: []
+      });
     }
     update({ children: arr });
   };
 
   return (
     <div className="bg-yellow-50 border border-yellow-300 rounded p-3 space-y-2 text-sm">
-      <p className="font-semibold text-stone-800">📌 {ownerName || 'この方'}（被相続人より後に亡くなった方）の相続人を入力してください</p>
+      <p className="font-semibold text-stone-800">📌 {ownerName || 'この方'}（被相続人より後に亡くなった方）の相続人</p>
       <p className="text-xs text-stone-600">
-        この方が一旦受け取った取り分は、この方の相続人に承継されます（<Term id="sequential">数次相続</Term>）。
+        この方が一旦受け取った取り分は、この方の相続人に承継されます（<Term id="sequential">数次相続</Term>）。さらにその相続人が亡くなっていれば、<b>代襲（先死亡）</b>や<b>再数次（後死亡）</b>にも対応します。
       </p>
       <div className="space-y-1.5">
         <Toggle label="配偶者がいる（ご存命）" checked={spouse.present}
           onChange={present => updateSpouse({ present })} />
         {spouse.present && (
-          <input type="text" placeholder="配偶者の名前"
-            value={spouse.name || ''}
-            onChange={e => updateSpouse({ name: e.target.value })}
-            className="border rounded px-2 py-1 text-sm ml-6 block w-48" />
+          <div className="flex gap-2 ml-6 flex-wrap items-center">
+            <input type="text" placeholder="配偶者の名前"
+              value={spouse.name || ''}
+              onChange={e => updateSpouse({ name: e.target.value })}
+              className="border rounded px-2 py-1 text-sm w-48" />
+            <Toggle label="放棄" checked={!!spouse.renounced}
+              onChange={(v2) => updateSpouse({ renounced: v2 })} />
+          </div>
         )}
       </div>
       <NumberPick label="お子さんの人数" value={children.length} min={0} max={10}
         onChange={setChildCount} />
-      {children.map((c, i) => (
-        <div key={c.id} className="ml-6 flex gap-2 items-center">
-          <span className="text-xs text-stone-500">{i+1}.</span>
-          <input type="text" value={c.name}
-            onChange={e => {
+      <div className="space-y-2">
+        {children.map((c, i) => (
+          <PersonInput key={c.id} value={c} depth={depth} label={`${i+1}`}
+            onChange={(nc) => {
               const arr = [...children];
-              arr[i] = { ...arr[i], name: e.target.value };
+              arr[i] = nc;
               update({ children: arr });
-            }}
-            className="border rounded px-2 py-1 text-sm flex-1" />
-        </div>
-      ))}
+            }} />
+        ))}
+      </div>
       {!spouse.present && children.length === 0 && (
         <p className="text-xs text-amber-800 bg-amber-100 rounded px-2 py-1">
           ⚠ 相続人を1人以上入力してください。誰も入力されていないと、この方の取り分の承継先が決まりません。

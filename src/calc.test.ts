@@ -253,3 +253,104 @@ describe('法定相続分 計算ロジック', () => {
     });
   });
 });
+
+describe('数次×代襲のクロス（実務ベンチマーク）', () => {
+  it('兄弟B(後死)→Bの子A(先死=代襲)→A1,A2 ＋ Bの子AA', () => {
+    const r = calculateExtended({
+      spouse: null,
+      children: [],
+      parents: [],
+      siblings: [
+        person('兄B', {
+          alive: false, diedAfter: true,
+          successors: {
+            spouse: { present: true, alive: true, name: 'BSpouse' },
+            children: [
+              person('A', {
+                alive: false,  // 先死亡＝代襲
+                descendants: [person('A1'), person('A2')]
+              }),
+              person('AA')
+            ]
+          }
+        })
+      ]
+    });
+    // B 単独相続：1
+    // → BSpouse 1/2、子全体 1/2
+    //   → A(代襲) 1/4 → A1 1/8, A2 1/8
+    //   → AA 1/4
+    checkRows(r.rows, [
+      { name: 'BSpouse', share: '1/2' },
+      { name: 'A1', share: '1/8' },
+      { name: 'A2', share: '1/8' },
+      { name: 'AA', share: '1/4' }
+    ]);
+  });
+
+  it('兄弟B(後死)→Bの子A(先死,代襲なし＝失権) → 残った子へ', () => {
+    const r = calculateExtended({
+      spouse: null, children: [], parents: [],
+      siblings: [
+        person('兄B', {
+          alive: false, diedAfter: true,
+          successors: {
+            spouse: null,
+            children: [
+              person('A', { alive: false, descendants: [] }),  // 子も孫もなし
+              person('AA')
+            ]
+          }
+        })
+      ]
+    });
+    // B 1 → AAのみ生存 → AA 1
+    checkRows(r.rows, [{ name: 'AA', share: '1' }]);
+  });
+
+  it('実例風：兄弟C(後死)＋兄弟D(後死,代襲混在)＋兄弟E(先死,甥)', () => {
+    const r = calculateExtended({
+      spouse: null, children: [], parents: [],
+      siblings: [
+        // C：後死亡、配偶者と子1人
+        person('C', {
+          alive: false, diedAfter: true,
+          successors: {
+            spouse: { present: true, alive: true, name: 'CSp' },
+            children: [person('CC')]
+          }
+        }),
+        // D：後死亡、配偶者と「先死亡の子（=代襲する孫）」
+        person('D', {
+          alive: false, diedAfter: true,
+          successors: {
+            spouse: { present: true, alive: true, name: 'DSp' },
+            children: [
+              person('DA', {
+                alive: false,
+                descendants: [person('DA1'), person('DA2')]
+              })
+            ]
+          }
+        }),
+        // E：先死亡（兄弟側代襲）、甥1人
+        person('E', {
+          alive: false,
+          descendants: [person('Eニス')]
+        })
+      ]
+    });
+    // C, D, E が全血兄弟3人扱い → 各 1/3
+    // C 1/3 → CSp 1/6, CC 1/6
+    // D 1/3 → DSp 1/6, DA(代襲) → DA1 1/12, DA2 1/12
+    // E 1/3 → Eニス 1/3 (兄弟側代襲)
+    checkRows(r.rows, [
+      { name: 'CSp', share: '1/6' },
+      { name: 'CC', share: '1/6' },
+      { name: 'DSp', share: '1/6' },
+      { name: 'DA1', share: '1/12' },
+      { name: 'DA2', share: '1/12' },
+      { name: 'Eニス', share: '1/3' }
+    ]);
+  });
+});
