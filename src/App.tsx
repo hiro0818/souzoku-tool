@@ -1499,19 +1499,47 @@ function RelationDiagram({ input, result }) {
     );
   };
 
+  // 代襲する子孫を再帰的に描画（子→孫→ひ孫…）
+  const descendantsBranch = (descs, role = '孫') => {
+    if (!descs || descs.length === 0) return null;
+    return (
+      <div className="flex flex-wrap gap-1 justify-center">
+        {descs.map((g, gi) => (
+          <div key={gi} className="flex flex-col items-center">
+            {node(g.name, role, { dead: g.alive === false })}
+            {!g.alive && (g.descendants || []).length > 0 && (
+              <>
+                <div className="rel-link" />
+                {descendantsBranch(g.descendants, role === '孫' ? 'ひ孫' : '直系卑属')}
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   const successorsBranch = (succ) => {
     if (!succ) return null;
     const sp = succ.spouse;
     return (
       <div className="flex flex-wrap gap-1.5 justify-center">
-        {sp && sp.present && <div>{node(sp.name, '配偶者')}</div>}
+        {sp && sp.present && <div>{node(sp.name, '配偶者', { dead: sp.alive === false })}</div>}
         {(succ.children || []).map((sc, sci) => (
-          <div key={sci}>
+          <div key={sci} className="flex flex-col items-center">
             {node(sc.name, '子', { dead: sc.alive === false })}
+            {/* 数次相続：後死亡 */}
             {sc.diedAfter && sc.successors && (
               <>
                 <div className="rel-link" />
                 {successorsBranch(sc.successors)}
+              </>
+            )}
+            {/* 代襲：先死亡または同時死亡で子がいる */}
+            {!sc.diedAfter && !sc.alive && (sc.descendants || []).length > 0 && (
+              <>
+                <div className="rel-link" />
+                {descendantsBranch(sc.descendants, '孫(代襲)')}
               </>
             )}
           </div>
