@@ -477,13 +477,16 @@ function App() {
   return (
     <GlossaryContext.Provider value={ctxValue}>
     <div>
-      <header className="mb-6 border-b border-stone-200 pb-4">
-        <h1 className="text-2xl font-bold">法定相続分シミュレーター <span className="text-xs text-stone-500 align-middle">（試作版 R5）</span></h1>
-        <p className="text-sm text-stone-600 mt-1">
+      <header className="mb-4 sm:mb-6 border-b border-stone-200 pb-3 sm:pb-4">
+        <h1 className="text-xl sm:text-2xl font-bold leading-tight">
+          法定相続分シミュレーター
+          <span className="text-xs text-stone-500 align-middle ml-1 sm:ml-2 inline-block">（試作版 R5）</span>
+        </h1>
+        <p className="text-xs sm:text-sm text-stone-600 mt-1">
           質問に答えると、<Term id="statutory-share">法定相続分</Term>（民法上の取り分）の目安を計算します。
-          <span className="block text-xs text-stone-500 mt-1">青い<span className="text-blue-700 underline decoration-dotted">下線つきの言葉</span>はクリックで意味を表示します。</span>
+          <span className="block text-xs text-stone-500 mt-1">青い<span className="text-blue-700 underline decoration-dotted">下線つきの言葉</span>はタップで意味を表示します。</span>
         </p>
-        <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 mt-2">⚠ 本ツールの結果は参考値です。実際の手続では弁護士・司法書士・税理士等の専門家にご確認ください。</p>
+        <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 mt-2 leading-relaxed">⚠ 本ツールの結果は参考値です。実際の手続では弁護士・司法書士・税理士等の専門家にご確認ください。</p>
       </header>
 
       {/* サンプルケース */}
@@ -505,19 +508,19 @@ function App() {
       {/* 保存・読込・URL共有 */}
       <section className="bg-stone-100 border border-stone-200 rounded-lg p-3 mb-6 no-print">
         <div className="flex flex-wrap gap-2 items-center">
-          <span className="text-xs text-stone-600 mr-2">📦 入力内容：</span>
+          <span className="text-xs text-stone-600 w-full sm:w-auto sm:mr-2">📦 入力内容：</span>
           <button type="button" onClick={saveLocal}
-            className="px-3 py-1 text-xs bg-white border border-stone-300 rounded hover:bg-stone-50">💾 この端末に保存</button>
+            className="px-3 py-2 min-h-[36px] text-xs sm:text-sm bg-white border border-stone-300 rounded hover:bg-stone-50 active:bg-stone-100">💾 端末に保存</button>
           <button type="button" onClick={loadLocal}
-            className="px-3 py-1 text-xs bg-white border border-stone-300 rounded hover:bg-stone-50">📂 保存内容を読み込み</button>
+            className="px-3 py-2 min-h-[36px] text-xs sm:text-sm bg-white border border-stone-300 rounded hover:bg-stone-50 active:bg-stone-100">📂 読み込み</button>
           <button type="button" onClick={clearLocal}
-            className="px-3 py-1 text-xs bg-white border border-stone-300 rounded hover:bg-stone-50 text-stone-600">🗑 保存削除</button>
+            className="px-3 py-2 min-h-[36px] text-xs sm:text-sm bg-white border border-stone-300 rounded hover:bg-stone-50 active:bg-stone-100 text-stone-600">🗑 保存削除</button>
           <button type="button" onClick={shareUrl}
-            className="px-3 py-1 text-xs bg-emerald-600 text-white border border-emerald-700 rounded hover:bg-emerald-700">🔗 URLでシェア</button>
+            className="px-3 py-2 min-h-[36px] text-xs sm:text-sm bg-emerald-600 text-white border border-emerald-700 rounded hover:bg-emerald-700 active:bg-emerald-800">🔗 URLシェア</button>
           <button type="button" onClick={reset}
-            className="px-3 py-1 text-xs bg-white border border-stone-300 rounded hover:bg-stone-50 text-stone-600">↺ 入力をリセット</button>
+            className="px-3 py-2 min-h-[36px] text-xs sm:text-sm bg-white border border-stone-300 rounded hover:bg-stone-50 active:bg-stone-100 text-stone-600">↺ リセット</button>
         </div>
-        <p className="text-xs text-stone-500 mt-2">※ 保存はお使いのブラウザのみ。サーバーには送信しません。URLにも家族構成データは入りますが、サーバー保存はありません。</p>
+        <p className="text-xs text-stone-500 mt-2 leading-relaxed">※ 保存はお使いのブラウザのみ。サーバーには送信しません。URLにも家族構成データは入りますが、サーバー保存はありません。</p>
       </section>
 
       <section className="space-y-6">
@@ -845,8 +848,8 @@ function App() {
 
 function Card({ title, children }) {
   return (
-    <div className="bg-white border border-stone-200 rounded-lg p-4 shadow-sm">
-      <h3 className="font-semibold mb-3">{title}</h3>
+    <div className="bg-white border border-stone-200 rounded-lg p-3 sm:p-4 shadow-sm">
+      <h3 className="font-semibold mb-2 sm:mb-3 text-sm sm:text-base">{title}</h3>
       {children}
     </div>
   );
@@ -856,8 +859,8 @@ function Choice({ value, onChange, options }) {
   return (
     <div className="flex flex-wrap gap-2">
       {options.map(o => (
-        <button key={String(o.v)}
-          className={`px-3 py-1.5 rounded border text-sm ${value === o.v ? 'bg-stone-900 text-white border-stone-900' : 'bg-white text-stone-800 border-stone-300 hover:bg-stone-50'}`}
+        <button key={String(o.v)} type="button"
+          className={`px-3 py-2 min-h-[40px] rounded border text-sm transition ${value === o.v ? 'bg-stone-900 text-white border-stone-900' : 'bg-white text-stone-800 border-stone-300 hover:bg-stone-50 active:bg-stone-100'}`}
           onClick={() => onChange(o.v)}>{o.label}</button>
       ))}
     </div>
@@ -866,22 +869,22 @@ function Choice({ value, onChange, options }) {
 
 function Toggle({ label, checked, onChange }) {
   return (
-    <label className="inline-flex items-center gap-2 cursor-pointer">
-      <input type="checkbox" checked={!!checked} onChange={e => onChange(e.target.checked)} className="accent-stone-900" />
-      <span>{label}</span>
+    <label className="inline-flex items-center gap-2 cursor-pointer py-1 select-none">
+      <input type="checkbox" checked={!!checked} onChange={e => onChange(e.target.checked)} className="w-4 h-4 accent-stone-900" />
+      <span className="text-sm">{label}</span>
     </label>
   );
 }
 
 function AliveStatus({ alive, onChange }) {
-  const base = 'px-3 py-1 text-sm border';
+  const base = 'px-3 py-2 min-h-[40px] text-sm border';
   return (
     <div className="inline-flex rounded overflow-hidden text-sm">
       <button type="button"
-        className={`${base} rounded-l ${alive ? 'bg-stone-900 text-white border-stone-900' : 'bg-white text-stone-700 border-stone-300 hover:bg-stone-50'}`}
+        className={`${base} rounded-l ${alive ? 'bg-stone-900 text-white border-stone-900' : 'bg-white text-stone-700 border-stone-300 hover:bg-stone-50 active:bg-stone-100'}`}
         onClick={() => onChange(true)}>ご存命</button>
       <button type="button"
-        className={`${base} rounded-r -ml-px ${!alive ? 'bg-stone-900 text-white border-stone-900' : 'bg-white text-stone-700 border-stone-300 hover:bg-stone-50'}`}
+        className={`${base} rounded-r -ml-px ${!alive ? 'bg-stone-900 text-white border-stone-900' : 'bg-white text-stone-700 border-stone-300 hover:bg-stone-50 active:bg-stone-100'}`}
         onClick={() => onChange(false)}>亡くなっている</button>
     </div>
   );
@@ -894,12 +897,12 @@ function AdoptedSelect({ value, onChange }) {
     { v: 'special', label: '特別養子' }
   ];
   return (
-    <label className="inline-flex items-center gap-2 text-sm">
+    <label className="inline-flex items-center gap-2 text-sm flex-wrap">
       <span className="text-stone-600">続柄：</span>
       <div className="inline-flex">
         {opts.map((o, i) => (
           <button key={String(o.v)} type="button"
-            className={`px-2.5 py-1 text-xs border ${i===0 ? 'rounded-l' : ''} ${i===opts.length-1 ? 'rounded-r' : ''} ${i>0 ? '-ml-px' : ''} ${value===o.v ? 'bg-stone-900 text-white border-stone-900' : 'bg-white text-stone-700 border-stone-300 hover:bg-stone-50'}`}
+            className={`px-3 py-2 min-h-[36px] text-xs border ${i===0 ? 'rounded-l' : ''} ${i===opts.length-1 ? 'rounded-r' : ''} ${i>0 ? '-ml-px' : ''} ${value===o.v ? 'bg-stone-900 text-white border-stone-900' : 'bg-white text-stone-700 border-stone-300 hover:bg-stone-50 active:bg-stone-100'}`}
             onClick={() => onChange(o.v)}>{o.label}</button>
         ))}
       </div>
@@ -908,8 +911,22 @@ function AdoptedSelect({ value, onChange }) {
 }
 
 function HelpHint({ text }) {
+  // モバイルでは hover が効かないので、クリック/タップでポップオーバー表示
+  const [open, setOpen] = useState(false);
   return (
-    <span className="ml-1 inline-block align-middle text-xs text-stone-400 cursor-help" title={text}>ⓘ</span>
+    <span className="relative inline-block align-middle ml-1">
+      <button type="button"
+        onClick={(e) => { e.stopPropagation(); setOpen(o => !o); }}
+        onBlur={() => setTimeout(() => setOpen(false), 150)}
+        className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-stone-200 hover:bg-stone-300 text-stone-700 text-xs"
+        aria-label="ヘルプ" title={text}>?</button>
+      {open && (
+        <span className="absolute z-30 left-1/2 -translate-x-1/2 mt-1 w-64 max-w-[80vw] bg-stone-900 text-white text-xs rounded p-2 shadow-lg leading-relaxed whitespace-normal text-left break-words"
+              role="tooltip">
+          {text}
+        </span>
+      )}
+    </span>
   );
 }
 
@@ -953,7 +970,8 @@ function PersonInput({ value, onChange, onRemove, label, depth = 0 }) {
     setDescendants(arr);
   };
 
-  const padding = depth === 0 ? '' : 'ml-3';
+  // モバイルではインデントを最小化、PCでは視認性のため少し残す
+  const padding = depth === 0 ? '' : 'ml-1 sm:ml-3';
   const bg = depth === 0 ? 'bg-yellow-50 border-yellow-300' :
              depth === 1 ? 'bg-amber-50 border-amber-300' :
              depth === 2 ? 'bg-orange-50 border-orange-300' :
@@ -961,18 +979,18 @@ function PersonInput({ value, onChange, onRemove, label, depth = 0 }) {
 
   return (
     <div className={`${padding} ${bg} border rounded p-2 space-y-2 text-sm`}>
-      <div className="flex items-center gap-2">
-        {label && <span className="badge bg-stone-700 text-white text-xs">{label}</span>}
+      <div className="flex items-center gap-2 flex-wrap">
+        {label && <span className="badge bg-stone-700 text-white text-xs flex-shrink-0">{label}</span>}
         <input type="text" value={v.name || ''} placeholder="氏名"
           onChange={e => onChange({ ...v, name: e.target.value })}
-          className="border rounded px-2 py-1 text-sm flex-1 min-w-0" />
+          className="border rounded px-2 py-1.5 text-sm flex-1 min-w-[120px]" />
         {onRemove && (
           <button type="button" onClick={onRemove}
-            className="text-xs text-rose-600 hover:underline">削除</button>
+            className="text-xs text-rose-600 hover:underline px-2 py-1">削除</button>
         )}
       </div>
-      <div className="flex flex-wrap gap-1">
-        <span className="text-xs text-stone-600 self-center mr-1">状態：</span>
+      <div className="flex flex-wrap gap-1 items-center">
+        <span className="text-xs text-stone-600 mr-1">状態：</span>
         {[
           { v: 'alive', label: 'ご存命' },
           { v: 'before', label: '先死亡(代襲)' },
@@ -981,7 +999,7 @@ function PersonInput({ value, onChange, onRemove, label, depth = 0 }) {
           { v: 'renounced', label: '相続放棄' }
         ].map(o => (
           <button key={o.v} type="button" onClick={() => setStatus(o.v)}
-            className={`px-2 py-0.5 text-xs border rounded ${status === o.v ? 'bg-stone-900 text-white border-stone-900' : 'bg-white text-stone-700 border-stone-300 hover:bg-stone-50'}`}>
+            className={`px-2 py-1.5 min-h-[32px] text-xs border rounded ${status === o.v ? 'bg-stone-900 text-white border-stone-900' : 'bg-white text-stone-700 border-stone-300 hover:bg-stone-50 active:bg-stone-100'}`}>
             {o.label}
           </button>
         ))}
@@ -1425,15 +1443,34 @@ function GlossaryList() {
 }
 
 function NumberPick({ label, value, min, max, onChange }) {
+  // バグ修正：empty/NaN ハンドリングを安全に
+  const handleChange = (e) => {
+    const raw = String(e.target.value || '').trim();
+    if (raw === '') return; // 空欄は受け付けない（前の値を維持）
+    const parsed = parseInt(raw, 10);
+    if (Number.isNaN(parsed)) return;
+    const n = Math.max(min, Math.min(max, parsed));
+    onChange(n);
+  };
+  const dec = () => onChange(Math.max(min, value - 1));
+  const inc = () => onChange(Math.min(max, value + 1));
   return (
-    <label className="inline-flex items-center gap-2 text-sm">
+    <label className="inline-flex items-center gap-2 text-sm flex-wrap">
       <span>{label}：</span>
-      <input type="number" min={min} max={max} value={value}
-        onChange={e => {
-          const n = Math.max(min, Math.min(max, parseInt(e.target.value || min, 10)));
-          onChange(n);
-        }}
-        className="w-20 border rounded px-2 py-1" />
+      <span className="inline-flex items-stretch">
+        <button type="button" onClick={dec}
+          aria-label="減らす"
+          className="w-9 h-9 sm:w-8 sm:h-8 border border-stone-300 rounded-l bg-white hover:bg-stone-50 active:bg-stone-100 disabled:opacity-40 text-base font-semibold"
+          disabled={value <= min}>−</button>
+        <input type="number" min={min} max={max} value={value}
+          onChange={handleChange}
+          inputMode="numeric"
+          className="w-12 sm:w-14 h-9 sm:h-8 border-y border-stone-300 px-1 text-center text-sm focus:outline-none focus:ring-1 focus:ring-stone-400" />
+        <button type="button" onClick={inc}
+          aria-label="増やす"
+          className="w-9 h-9 sm:w-8 sm:h-8 border border-stone-300 rounded-r bg-white hover:bg-stone-50 active:bg-stone-100 disabled:opacity-40 text-base font-semibold"
+          disabled={value >= max}>＋</button>
+      </span>
     </label>
   );
 }
@@ -1641,13 +1678,13 @@ function ResultView({ result, input }) {
       {result.citations.length > 0 && (
         <div className="mt-2 text-xs text-stone-500">参考条文：{result.citations.join('、')}</div>
       )}
-      <div className="flex gap-2 mt-4 no-print">
+      <div className="flex flex-wrap gap-2 mt-4 no-print items-center">
         <button type="button"
-          className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+          className="px-3 py-2 min-h-[40px] bg-blue-600 text-white text-sm rounded hover:bg-blue-700 active:bg-blue-800"
           onClick={() => window.print()}>
           🖨 印刷／PDFとして保存
         </button>
-        <span className="text-xs text-stone-500 self-center">
+        <span className="text-xs text-stone-500 leading-relaxed">
           ブラウザの印刷ダイアログで「PDF として保存」を選べます。
         </span>
       </div>
