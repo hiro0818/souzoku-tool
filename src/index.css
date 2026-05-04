@@ -6,6 +6,21 @@ body {
   font-family: system-ui, -apple-system, "Segoe UI", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", sans-serif;
 }
 
+/* iOS Safari: ダブルタップ→ズームの300ms遅延を全インタラクティブ要素で排除 */
+button, [role="button"], a, label, input[type="checkbox"], input[type="radio"] {
+  touch-action: manipulation;
+}
+
+/* iOS Safari の input フォーカス時オートズーム対策（フォントサイズが16px未満だと拡大される） */
+@media (max-width: 640px) {
+  input[type="text"],
+  input[type="number"],
+  input[type="email"],
+  textarea {
+    font-size: 16px;
+  }
+}
+
 .badge {
   display: inline-block;
   padding: 0.05rem 0.4rem;

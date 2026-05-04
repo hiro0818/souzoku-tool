@@ -575,7 +575,7 @@ function App() {
                 <div key={c.id} className="bg-stone-100 rounded p-3 space-y-2">
                   <div className="flex items-center gap-2">
                     <span className="badge bg-stone-700 text-white">{idx+1}</span>
-                    <input className="border rounded px-2 py-1 text-sm flex-1" value={c.name}
+                    <input className="border rounded px-2 py-2 text-base sm:text-sm sm:py-1 flex-1" value={c.name}
                       onChange={e => setChild(idx, { name: e.target.value })} />
                   </div>
                   <div className="flex flex-wrap gap-3 text-sm items-center">
@@ -621,7 +621,7 @@ function App() {
                             onChange={n => setGrandcount(idx, n)} />
                           {(c.descendants || []).map((g, gi) => (
                             <div key={g.id} className="bg-white rounded border border-stone-200 p-2 flex flex-wrap gap-3 items-center">
-                              <input className="border rounded px-2 py-1 text-sm" value={g.name}
+                              <input className="border rounded px-2 py-2 text-base sm:text-sm sm:py-1" value={g.name}
                                 onChange={e => {
                                   const ds = [...c.descendants];
                                   ds[gi] = { ...ds[gi], name: e.target.value };
@@ -692,7 +692,7 @@ function App() {
                   {state.grandparents.slice(0, state.grandparentsCount || 1).map((gp, idx) => (
                     <div key={gp.id} className="flex items-center gap-2 bg-stone-50 rounded p-2">
                       <span className="badge bg-stone-700 text-white">{idx+1}</span>
-                      <input className="border rounded px-2 py-1 text-sm flex-1" value={gp.name}
+                      <input className="border rounded px-2 py-2 text-base sm:text-sm sm:py-1 flex-1" value={gp.name}
                         onChange={e => {
                           const arr = [...state.grandparents];
                           arr[idx] = { ...arr[idx], name: e.target.value };
@@ -727,7 +727,7 @@ function App() {
                 <div key={s.id} className="bg-stone-100 rounded p-3 space-y-2">
                   <div className="flex items-center gap-2">
                     <span className="badge bg-stone-700 text-white">{idx+1}</span>
-                    <input className="border rounded px-2 py-1 text-sm flex-1" value={s.name}
+                    <input className="border rounded px-2 py-2 text-base sm:text-sm sm:py-1 flex-1" value={s.name}
                       onChange={e => setSibling(idx, { name: e.target.value })} />
                   </div>
                   <div className="flex flex-wrap gap-3 text-sm items-center">
@@ -778,7 +778,7 @@ function App() {
                                 onChange={n => setNibcount(idx, n)} />
                               {(s.descendants || []).map((g, gi) => (
                                 <div key={g.id} className="bg-white rounded border border-stone-200 p-2 flex flex-wrap gap-3 items-center">
-                                  <input className="border rounded px-2 py-1 text-sm" value={g.name}
+                                  <input className="border rounded px-2 py-2 text-base sm:text-sm sm:py-1" value={g.name}
                                     onChange={e => {
                                       const ds = [...s.descendants];
                                       ds[gi] = { ...ds[gi], name: e.target.value };
@@ -983,7 +983,7 @@ function PersonInput({ value, onChange, onRemove, label, depth = 0 }) {
         {label && <span className="badge bg-stone-700 text-white text-xs flex-shrink-0">{label}</span>}
         <input type="text" value={v.name || ''} placeholder="氏名"
           onChange={e => onChange({ ...v, name: e.target.value })}
-          className="border rounded px-2 py-1.5 text-sm flex-1 min-w-[120px]" />
+          className="border rounded px-2 py-2 text-base sm:text-sm sm:py-1.5 flex-1 min-w-[120px]" />
         {onRemove && (
           <button type="button" onClick={onRemove}
             className="text-xs text-rose-600 hover:underline px-2 py-1">削除</button>
@@ -1076,7 +1076,7 @@ function SuccessorsInput({ value, onChange, ownerName, depth = 1 }) {
             <input type="text" placeholder="配偶者の名前"
               value={spouse.name || ''}
               onChange={e => updateSpouse({ name: e.target.value })}
-              className="border rounded px-2 py-1 text-sm w-48" />
+              className="border rounded px-2 py-2 text-base sm:text-sm sm:py-1 w-48" />
             <Toggle label="放棄" checked={!!spouse.renounced}
               onChange={(v2) => updateSpouse({ renounced: v2 })} />
           </div>
@@ -1444,6 +1444,7 @@ function GlossaryList() {
 
 function NumberPick({ label, value, min, max, onChange }) {
   // バグ修正：empty/NaN ハンドリングを安全に
+  // モバイル対策：<label> ではなく <div> を使い、ボタンタップが label-input にバブリングしないようにする
   const handleChange = (e) => {
     const raw = String(e.target.value || '').trim();
     if (raw === '') return; // 空欄は受け付けない（前の値を維持）
@@ -1455,23 +1456,26 @@ function NumberPick({ label, value, min, max, onChange }) {
   const dec = () => onChange(Math.max(min, value - 1));
   const inc = () => onChange(Math.min(max, value + 1));
   return (
-    <label className="inline-flex items-center gap-2 text-sm flex-wrap">
-      <span>{label}：</span>
-      <span className="inline-flex items-stretch">
+    <div className="inline-flex items-center gap-2 text-sm flex-wrap">
+      <span className="text-stone-700">{label}：</span>
+      <div className="inline-flex items-stretch select-none">
         <button type="button" onClick={dec}
           aria-label="減らす"
-          className="w-9 h-9 sm:w-8 sm:h-8 border border-stone-300 rounded-l bg-white hover:bg-stone-50 active:bg-stone-100 disabled:opacity-40 text-base font-semibold"
+          className="w-11 h-11 sm:w-9 sm:h-9 border border-stone-300 rounded-l bg-white hover:bg-stone-50 active:bg-stone-200 disabled:opacity-40 disabled:cursor-not-allowed text-lg font-semibold text-stone-800 touch-manipulation"
           disabled={value <= min}>−</button>
         <input type="number" min={min} max={max} value={value}
           onChange={handleChange}
+          onFocus={e => e.target.select()}
           inputMode="numeric"
-          className="w-12 sm:w-14 h-9 sm:h-8 border-y border-stone-300 px-1 text-center text-sm focus:outline-none focus:ring-1 focus:ring-stone-400" />
+          pattern="[0-9]*"
+          aria-label={`${label}（数値）`}
+          className="w-14 sm:w-14 h-11 sm:h-9 border-y border-stone-300 px-1 text-center text-base sm:text-sm font-medium focus:outline-none focus:ring-2 focus:ring-stone-400 focus:bg-stone-50" />
         <button type="button" onClick={inc}
           aria-label="増やす"
-          className="w-9 h-9 sm:w-8 sm:h-8 border border-stone-300 rounded-r bg-white hover:bg-stone-50 active:bg-stone-100 disabled:opacity-40 text-base font-semibold"
+          className="w-11 h-11 sm:w-9 sm:h-9 border border-stone-300 rounded-r bg-white hover:bg-stone-50 active:bg-stone-200 disabled:opacity-40 disabled:cursor-not-allowed text-lg font-semibold text-stone-800 touch-manipulation"
           disabled={value >= max}>＋</button>
-      </span>
-    </label>
+      </div>
+    </div>
   );
 }
 
